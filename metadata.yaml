@@ -1,0 +1,5 @@
+homepage: "https://illow.io/"
+documentation: "https://docs.illow.io/"
+versions:
+  - sha:
+    changeNotes: Initial release.
