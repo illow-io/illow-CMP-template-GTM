@@ -14,7 +14,7 @@ ___INFO___
   "version": 1,
   "securityGroups": [],
   "displayName": "illow CMP",
-  "categories": [
+    "categories": [
     "TAG_MANAGEMENT",
     "PERSONALIZATION"
   ],
@@ -45,7 +45,7 @@ ___TEMPLATE_PARAMETERS___
     ],
     "valueHint": "Your SITE ID",
     "notSetText": "This field is required.",
-    "help": "Log in to your illow account \u003e In the home section, you will find your cookies banner code \u003e Click on the \u0027Copy to clipboard\u0027 button associated with your site \u003e Copy your SITE ID from the src attribute (e.g. \u003cscript src\u003d\"https://platform.illow.io/banner.js?siteId\u003dYOUR_SITE_ID\"\u003e\u003c/script\u003e)."
+    "help": "Log in to your illow account \u003e In the home section, you will find your cookies banner code \u003e Click on the \u0027Copy to clipboard\u0027 button associated with your site \u003e Copy your SITE ID from the src attribute (e.g. src\u003d\"https://platform.illow.io/banner.js?siteId\u003dYOUR_SITE_ID\")."
   }
 ]
 
@@ -314,11 +314,13 @@ ___WEB_PERMISSIONS___
 
 ___TESTS___
 
-scenarios: []
+scenarios:
+- name: Quick Test
+  code: runCode();
+setup: ''
 
 
 ___NOTES___
 
-Created on 3/28/2023, 4:11:16 PM
-
+Created on 3/31/2023, 12:11:32 PM
 
