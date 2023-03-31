@@ -1,5 +1,5 @@
 homepage: "https://illow.io/"
 documentation: "https://docs.illow.io/"
 versions:
-  - sha:
+  - sha: e34cdd365ee0a3747e732e9c90cd975e43265838
     changeNotes: Initial release.
