@@ -1,5 +1,7 @@
 homepage: "https://illow.io/"
 documentation: "https://docs.illow.io/"
 versions:
+  - sha: fdf914edd48b9123ba43c288747f9d69d2703662
+    changeNotes: Read consent state from cookie.
   - sha: 26f5032df1db0f03bc8526c6880a6f8067ecb992
     changeNotes: Initial release.
