@@ -1,11 +1,3 @@
-﻿___TERMS_OF_SERVICE___
-
-By creating or modifying this file you agree to Google Tag Manager's Community
-Template Gallery Developer Terms of Service available at
-https://developers.google.com/tag-manager/gallery-tos (or such other URL as
-Google may provide), as modified from time to time.
-
-
 ___INFO___
 
 {
@@ -58,9 +50,10 @@ const setDefaultConsentState = require('setDefaultConsentState');
 const encodeUri = require('encodeUri');
 const getCookieValues = require('getCookieValues');
 const JSON = require('JSON');
+const log = require('logToConsole');
 
 const cookieName = 'illow-consent-' + data.bannerCode;
-const consentStr = queryPermission('get_cookies', cookieName) ? getCookieValues(cookieName) : undefined;
+const consentStr = queryPermission('get_cookies', cookieName) ? getCookieValues(cookieName, true)[0] : undefined;
 const consent = consentStr ? JSON.parse(consentStr) : undefined;
 
 
@@ -334,6 +327,24 @@ ___WEB_PERMISSIONS___
     },
     "clientAnnotations": {
       "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "logging",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "environments",
+          "value": {
+            "type": 1,
+            "string": "debug"
+          }
+        }
+      ]
     },
     "isRequired": true
   }
