@@ -1,6 +1,8 @@
 homepage: "https://illow.io/"
 documentation: "https://docs.illow.io/"
 versions:
+  - sha: 047a5bb23fb05fb4be803bebf7444763e818b6fa
+    changeNotes: IAB stub added
   - sha: 1d09f3dfb24b1d28d09fa60903fff772900057f2
     changeNotes: Fixed cookie value bug
   - sha: fdf914edd48b9123ba43c288747f9d69d2703662
