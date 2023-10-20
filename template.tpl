@@ -74,6 +74,7 @@ setDefaultConsentState({
   functionality_storage: consent && consent.preferences ? 'granted' : 'denied',
   personalization_storage: consent && consent.preferences ? 'granted' : 'denied',
   security_storage: consent && consent.preferences ? 'granted' : 'denied',
+  wait_for_update: 500
 });
 
 const tcfAPIQueuePush = createQueue('__tcfapiQueue');
