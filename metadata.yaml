@@ -1,6 +1,8 @@
 homepage: "https://illow.io/"
 documentation: "https://docs.illow.io/"
 versions:
+  - sha: 42b7687eafb0c892150a034a610055673ae52349
+    changeNotes: ads_data_redaction fixed
   - sha: 047a5bb23fb05fb4be803bebf7444763e818b6fa
     changeNotes: IAB stub added
   - sha: 1d09f3dfb24b1d28d09fa60903fff772900057f2
