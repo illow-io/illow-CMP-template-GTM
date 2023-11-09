@@ -52,6 +52,7 @@ ___TEMPLATE_PARAMETERS___
 
 ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 
+const gtagSet = require('gtagSet');
 const setInWindow = require('setInWindow');
 const copyFromWindow = require('copyFromWindow');
 const createQueue = require('createQueue');
@@ -69,12 +70,15 @@ const consent = consentStr ? JSON.parse(consentStr) : undefined;
 
 setDefaultConsentState({
   ad_storage: consent && consent.marketing ? 'granted' : 'denied',
-  ads_data_redaction: consent && consent.marketing ? 'granted' : 'denied',
   analytics_storage: consent && consent.preferences ? 'granted' : 'denied',
   functionality_storage: consent && consent.preferences ? 'granted' : 'denied',
   personalization_storage: consent && consent.preferences ? 'granted' : 'denied',
   security_storage: consent && consent.preferences ? 'granted' : 'denied',
   wait_for_update: 500
+});
+
+gtagSet({
+  'ads_data_redaction': !consent || !consent.marketing,
 });
 
 const tcfAPIQueuePush = createQueue('__tcfapiQueue');
@@ -283,37 +287,6 @@ ___WEB_PERMISSIONS___
                     "boolean": true
                   }
                 ]
-              },
-              {
-                "type": 3,
-                "mapKey": [
-                  {
-                    "type": 1,
-                    "string": "consentType"
-                  },
-                  {
-                    "type": 1,
-                    "string": "read"
-                  },
-                  {
-                    "type": 1,
-                    "string": "write"
-                  }
-                ],
-                "mapValue": [
-                  {
-                    "type": 1,
-                    "string": "ads_data_redaction"
-                  },
-                  {
-                    "type": 8,
-                    "boolean": true
-                  },
-                  {
-                    "type": 8,
-                    "boolean": true
-                  }
-                ]
               }
             ]
           }
@@ -435,6 +408,32 @@ ___WEB_PERMISSIONS___
                     "boolean": false
                   }
                 ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "clientAnnotations": {
+      "isEditedByUser": true
+    },
+    "isRequired": true
+  },
+  {
+    "instance": {
+      "key": {
+        "publicId": "write_data_layer",
+        "versionId": "1"
+      },
+      "param": [
+        {
+          "key": "keyPatterns",
+          "value": {
+            "type": 2,
+            "listItem": [
+              {
+                "type": 1,
+                "string": "ads_data_redaction"
               }
             ]
           }
