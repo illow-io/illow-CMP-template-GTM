@@ -46,6 +46,14 @@ ___TEMPLATE_PARAMETERS___
     "valueHint": "Your SITE ID",
     "notSetText": "This field is required.",
     "help": "Log into your illow account \u003e In the home section, you will find your cookies banner code \u003e Click on the \u0027Copy to clipboard\u0027 button associated with your site \u003e Copy your SITE ID from the src attribute (e.g. src\u003d\"https://platform.illow.io/banner.js?siteId\u003dYOUR_SITE_ID\")."
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "iabStub",
+    "checkboxText": "Implement IAB TCF stub method",
+    "simpleValueType": true,
+    "defaultValue": true,
+    "help": "When turned on, this setting will add an initial stub method for IAB TCF before the banner loads. This is useful to prevent third-party scripts from assuming no IAB logic will be at the website.\nWhen turned off, no stub method will be loaded, while the banner will only insert IAB TCF logic if the feature is enabled at illow\u0027s platform.\nDisable this switch only if you are sure you will not use IAB TCF at any time."
   }
 ]
 
@@ -63,10 +71,12 @@ const encodeUri = require('encodeUri');
 const getCookieValues = require('getCookieValues');
 const JSON = require('JSON');
 
+/**
+ * Google Consent Mode
+ */
 const cookieName = 'illow-consent-' + data.bannerCode;
 const consentStr = queryPermission('get_cookies', cookieName) ? getCookieValues(cookieName, true)[0] : undefined;
 const consent = consentStr ? JSON.parse(consentStr) : undefined;
-
 
 setDefaultConsentState({
   ad_storage: consent && consent.marketing ? 'granted' : 'denied',
@@ -81,12 +91,21 @@ gtagSet({
   'ads_data_redaction': !consent || !consent.marketing,
 });
 
-const tcfAPIQueuePush = createQueue('__tcfapiQueue');
-setInWindow('__tcfapi', function() {
-  return arguments.length === 0 ? copyFromWindow('__tcfapiQueue') : tcfAPIQueuePush(arguments);
-});
+/**
+ * IAB TCF
+ */
+if (data.iabStub) {
+  const tcfAPIQueuePush = createQueue('__tcfapiQueue');
+  setInWindow('__tcfapi', function() {
+    return arguments.length === 0 ? copyFromWindow('__tcfapiQueue') : tcfAPIQueuePush(arguments);
+  });
+}
 
-let scriptSrc = 'https://platform.illow.io/banner.js?siteId=' + encodeUri(data.bannerCode);
+/**
+ * Banner Script Tag
+ */
+const noIab = !data.iabStub ? '&noIab=true' : '';
+let scriptSrc = 'https://platform.illow.io/banner.js?siteId=' + encodeUri(data.bannerCode) + noIab;
 if (!queryPermission('inject_script', scriptSrc))
    return data.gtmOnFailure();
 injectScript(scriptSrc, data.gtmOnSuccess, data.gtmOnFailure);
