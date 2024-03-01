@@ -69,14 +69,38 @@ const queryPermission = require('queryPermission');
 const setDefaultConsentState = require('setDefaultConsentState');
 const encodeUri = require('encodeUri');
 const getCookieValues = require('getCookieValues');
-const JSON = require('JSON');
+const makeNumber = require('makeNumber');
+
+const getBooleanOrUndefined = (v) => {
+  if (typeof v === 'undefined') return undefined;
+  return v === 'true';
+};
+
+const transformToConsent = (stringConsent) => {
+  if (!stringConsent) return undefined;
+  const data = {};
+  stringConsent.split('|').map((v) => v.split('=')).forEach((v) => {
+    data[v[0]] = v[1];
+  });
+  return {
+    noConsentNeeded: getBooleanOrUndefined(data.noConsentNeeded),
+    optedIn: getBooleanOrUndefined(data.optedIn),
+    "consent-id": data['consent-id'],
+    necessary: getBooleanOrUndefined(data.necessary),
+    preferences: getBooleanOrUndefined(data.preferences),
+    marketing: getBooleanOrUndefined(data.marketing),
+    statistics: getBooleanOrUndefined(data.statistics),
+    unclassified: getBooleanOrUndefined(data.unclassified),
+    updatedAt: makeNumber(data.updatedAt) || undefined,
+  };
+};
 
 /**
  * Google Consent Mode
  */
 const cookieName = 'illow-consent-' + data.bannerCode;
 const consentStr = queryPermission('get_cookies', cookieName) ? getCookieValues(cookieName, true)[0] : undefined;
-const consent = consentStr ? JSON.parse(consentStr) : undefined;
+const consent = transformToConsent(consentStr);
 
 setDefaultConsentState({
   ad_storage: consent && consent.marketing ? 'granted' : 'denied',
