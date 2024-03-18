@@ -1,6 +1,8 @@
 homepage: "https://illow.io/"
 documentation: "https://docs.illow.io/"
 versions:
+  - sha: 21eec6216db5e18fb0d2dfeb741a14e2b4c68c3c
+    changeNotes: Added Developer ID and URL Passthrough configurations
   - sha: a1e080da810e4602af455c64a2435c027d3c7dd8
     changeNotes: Improved consent initialization flow
   - sha: 859d4d743cf3de447ab2da974d589a9bcb031247
