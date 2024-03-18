@@ -115,6 +115,8 @@ setDefaultConsentState({
 
 gtagSet({
   'ads_data_redaction': !consent || !consent.marketing,
+  'url_passthrough': !consent || !consent.marketing || !consent.preferences,
+  'developer_id.dYTYxZj': true,
 });
 
 /**
@@ -541,6 +543,14 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "ads_data_redaction"
+              },
+              {
+                "type": 1,
+                "string": "url_passthrough"
+              },
+              {
+                "type": 1,
+                "string": "developer_id.dYTYxZj"
               }
             ]
           }
