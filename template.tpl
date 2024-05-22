@@ -54,6 +54,13 @@ ___TEMPLATE_PARAMETERS___
     "simpleValueType": true,
     "defaultValue": true,
     "help": "When turned on, this setting will add an initial stub method for IAB TCF before the banner loads. This is useful to prevent third-party scripts from assuming no IAB logic will be at the website.\nWhen turned off, no stub method will be loaded, while the banner will only insert IAB TCF logic if the feature is enabled at illow\u0027s platform.\nDisable this switch only if you are sure you will not use IAB TCF at any time."
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "noUrlPassthrough",
+    "checkboxText": "Disable URL Passthrough",
+    "simpleValueType": true,
+    "help": "When \"URL Passthrough\" is enabled (checkbox is not checked), information about ad clicks, events and session-based analytics will be passed through URL parameters across pages, until the user sets the proper consent to store such data.\nHaving it enabled will optimize your website\u0027s tracking and conversions, while staying privacy-compliant. Disable it by checking the box, only if you need to avoid adding query parameters to your URL."
   }
 ]
 
@@ -69,53 +76,79 @@ const queryPermission = require('queryPermission');
 const setDefaultConsentState = require('setDefaultConsentState');
 const encodeUri = require('encodeUri');
 const getCookieValues = require('getCookieValues');
-const makeNumber = require('makeNumber');
 
 const getBooleanOrUndefined = (v) => {
   if (typeof v === 'undefined') return undefined;
   return v === 'true';
 };
 
-const transformToConsent = (stringConsent) => {
-  if (!stringConsent) return undefined;
-  const data = {};
-  stringConsent.split('|').map((v) => v.split('=')).forEach((v) => {
-    data[v[0]] = v[1];
-  });
+const wait_for_update = 500;
+
+const transformToGoogleSettings = (str) => {
+  if (!str) return undefined;
+  const p = ['optedIn', 'preferences', 'marketing', 'statistics'];
+  const c = {};
+  str
+    .split('|')
+    .map((v) => v.split('='))
+    .filter((v) => p.reduce((prev, prop) => prev || (prop === v[0]), false))
+    .forEach((v) => {
+      c[v[0]] = getBooleanOrUndefined(v[1]);
+    });
   return {
-    noConsentNeeded: getBooleanOrUndefined(data.noConsentNeeded),
-    optedIn: getBooleanOrUndefined(data.optedIn),
-    "consent-id": data['consent-id'],
-    necessary: getBooleanOrUndefined(data.necessary),
-    preferences: getBooleanOrUndefined(data.preferences),
-    marketing: getBooleanOrUndefined(data.marketing),
-    statistics: getBooleanOrUndefined(data.statistics),
-    unclassified: getBooleanOrUndefined(data.unclassified),
-    updatedAt: makeNumber(data.updatedAt) || undefined,
+    state: {
+      ad_storage: c.marketing || c.optedId ? 'granted' : 'denied',
+      analytics_storage: c.preferences || c.optedId ? 'granted' : 'denied',
+      functionality_storage: c.preferences || c.optedId ? 'granted' : 'denied',
+      personalization_storage: c.preferences || c.optedId ? 'granted' : 'denied',
+      security_storage: c.preferences || c.optedId ? 'granted' : 'denied',
+      ad_user_data: c.marketing || c.optedId ? 'granted' : 'denied',
+      ad_personalization: c.marketing || c.optedId ? 'granted' : 'denied',
+      wait_for_update: wait_for_update,
+    },
+    others: {
+      ads_data_redaction: !c.marketing && !c.optedId,
+      url_passthrough: (!c.marketing || !c.preferences) && !c.optedId,
+    },
   };
 };
+
+const regions = [
+  { region: ['US-VA', 'US-CO', 'US-IN'], value: 'denied' },
+  { region: ['US'], value: 'granted' },
+  { value: 'denied' },
+];
 
 /**
  * Google Consent Mode
  */
 const cookieName = 'illow-consent-' + data.bannerCode;
 const consentStr = queryPermission('get_cookies', cookieName) ? getCookieValues(cookieName, true)[0] : undefined;
-const consent = transformToConsent(consentStr);
+const googleSettings = transformToGoogleSettings(consentStr);
 
-setDefaultConsentState({
-  ad_storage: consent && consent.marketing ? 'granted' : 'denied',
-  analytics_storage: consent && consent.preferences ? 'granted' : 'denied',
-  functionality_storage: consent && consent.preferences ? 'granted' : 'denied',
-  personalization_storage: consent && consent.preferences ? 'granted' : 'denied',
-  security_storage: consent && consent.preferences ? 'granted' : 'denied',
-  ad_user_data: consent && consent.marketing ? 'granted' : 'denied',
-  ad_personalization: consent && consent.marketing ? 'granted' : 'denied',
-  wait_for_update: 500
-});
+if (googleSettings) {
+  setDefaultConsentState(googleSettings.state);
+} else {
+  regions.forEach((state) => {
+    setDefaultConsentState({
+      ad_storage: state.value,
+      analytics_storage: state.value,
+      functionality_storage: state.value,
+      personalization_storage: state.value,
+      security_storage: state.value,
+      ad_user_data: state.value,
+      ad_personalization: state.value,
+      region: state.region,
+      wait_for_update: wait_for_update,
+    });
+  });
+}
+
+const urlPassthrough = !data.noUrlPassthrough && (!googleSettings || googleSettings.others.url_passthrough);
 
 gtagSet({
-  'ads_data_redaction': !consent || !consent.marketing,
-  'url_passthrough': !consent || !consent.marketing || !consent.preferences,
+  ads_data_redaction: !googleSettings || googleSettings.others.ads_data_redaction,
+  url_passthrough: urlPassthrough,
   'developer_id.dYTYxZj': true,
 });
 
@@ -133,7 +166,8 @@ if (data.iabStub) {
  * Banner Script Tag
  */
 const noIab = !data.iabStub ? '&noIab=true' : '';
-let scriptSrc = 'https://platform.illow.io/banner.js?siteId=' + encodeUri(data.bannerCode) + noIab;
+const noUrlPassthrough = !urlPassthrough ? '&noUrlPassthrough=true' : '';
+let scriptSrc = 'https://platform.illow.io/banner.js?siteId=' + encodeUri(data.bannerCode) + noIab + noUrlPassthrough;
 if (!queryPermission('inject_script', scriptSrc))
    return data.gtmOnFailure();
 injectScript(scriptSrc, data.gtmOnSuccess, data.gtmOnFailure);
