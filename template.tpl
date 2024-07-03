@@ -1,11 +1,3 @@
-___TERMS_OF_SERVICE___
-
-By creating or modifying this file you agree to Google Tag Manager's Community
-Template Gallery Developer Terms of Service available at
-https://developers.google.com/tag-manager/gallery-tos (or such other URL as
-Google may provide), as modified from time to time.
-
-
 ___INFO___
 
 {
@@ -61,6 +53,179 @@ ___TEMPLATE_PARAMETERS___
     "checkboxText": "Disable URL Passthrough",
     "simpleValueType": true,
     "help": "When \"URL Passthrough\" is enabled (checkbox is not checked), information about ad clicks, events and session-based analytics will be passed through URL parameters across pages, until the user sets the proper consent to store such data.\nHaving it enabled will optimize your website\u0027s tracking and conversions, while staying privacy-compliant. Disable it by checking the box, only if you need to avoid adding query parameters to your URL."
+  },
+  {
+    "type": "PARAM_TABLE",
+    "name": "regionsDefaults",
+    "displayName": "Google Consent Mode default values by region",
+    "paramTableColumns": [
+      {
+        "param": {
+          "type": "TEXT",
+          "name": "region",
+          "displayName": "Region",
+          "simpleValueType": true,
+          "help": "The region expressed in ISO_3166-2 code, i.e. two letters for the country and, optionally, an en dash and two letters for its sub-region. For example, \"US-CA\".\nFor multiple values, provide a comma-separated list, e.g.: \"US-CA,US-VA,US,DE\".\nLeave empty for worldwide configuration."
+        },
+        "isUnique": false
+      },
+      {
+        "param": {
+          "type": "SELECT",
+          "name": "ad_storage",
+          "displayName": "Ad Storage",
+          "help": "Enables storage (such as cookies) related to advertising.",
+          "macrosInSelect": true,
+          "selectItems": [
+            {
+              "value": "granted",
+              "displayValue": "Granted"
+            },
+            {
+              "value": "denied",
+              "displayValue": "Denied"
+            }
+          ],
+          "simpleValueType": true,
+          "defaultValue": "denied"
+        },
+        "isUnique": false
+      },
+      {
+        "param": {
+          "type": "SELECT",
+          "name": "analytics_storage",
+          "displayName": "Analytics Storage",
+          "help": "Enables storage (such as cookies) related to analytics e.g. visit duration.",
+          "macrosInSelect": true,
+          "selectItems": [
+            {
+              "value": "granted",
+              "displayValue": "Granted"
+            },
+            {
+              "value": "denied",
+              "displayValue": "Denied"
+            }
+          ],
+          "simpleValueType": true,
+          "defaultValue": "denied"
+        },
+        "isUnique": false
+      },
+      {
+        "param": {
+          "type": "SELECT",
+          "name": "functionality_storage",
+          "displayName": "Functionality Storage",
+          "help": "Enables storage that supports the functionality of the website or app e.g. language settings.",
+          "macrosInSelect": true,
+          "selectItems": [
+            {
+              "value": "granted",
+              "displayValue": "Granted"
+            },
+            {
+              "value": "denied",
+              "displayValue": "Denied"
+            }
+          ],
+          "simpleValueType": true,
+          "defaultValue": "denied"
+        },
+        "isUnique": false
+      },
+      {
+        "param": {
+          "type": "SELECT",
+          "name": "personalization_storage",
+          "displayName": "Personalization Storage",
+          "help": "Enables storage related to personalization e.g. video recommendations.",
+          "macrosInSelect": true,
+          "selectItems": [
+            {
+              "value": "granted",
+              "displayValue": "Granted"
+            },
+            {
+              "value": "denied",
+              "displayValue": "Denied"
+            }
+          ],
+          "simpleValueType": true,
+          "defaultValue": "denied"
+        },
+        "isUnique": false
+      },
+      {
+        "param": {
+          "type": "SELECT",
+          "name": "security_storage",
+          "displayName": "Security Storage",
+          "help": "Enables storage related to security such as authentication functionality, fraud prevention, and other user protection.",
+          "macrosInSelect": true,
+          "selectItems": [
+            {
+              "value": "granted",
+              "displayValue": "Granted"
+            },
+            {
+              "value": "denied",
+              "displayValue": "Denied"
+            }
+          ],
+          "simpleValueType": true,
+          "defaultValue": "denied"
+        },
+        "isUnique": false
+      },
+      {
+        "param": {
+          "type": "SELECT",
+          "name": "ad_user_data",
+          "displayName": "Share data for ads",
+          "help": "Sets consent for sending user data to Google for advertising purposes.",
+          "macrosInSelect": true,
+          "selectItems": [
+            {
+              "value": "granted",
+              "displayValue": "Granted"
+            },
+            {
+              "value": "denied",
+              "displayValue": "Denied"
+            }
+          ],
+          "simpleValueType": true,
+          "defaultValue": "denied"
+        },
+        "isUnique": false
+      },
+      {
+        "param": {
+          "type": "SELECT",
+          "name": "ad_personalization",
+          "displayName": "Personalize ads",
+          "help": "Sets consent for personalized advertising.",
+          "macrosInSelect": true,
+          "selectItems": [
+            {
+              "value": "granted",
+              "displayValue": "Granted"
+            },
+            {
+              "value": "denied",
+              "displayValue": "Denied"
+            }
+          ],
+          "simpleValueType": true,
+          "defaultValue": "denied"
+        },
+        "isUnique": false
+      }
+    ],
+    "help": "For Google Consent Mode to work, initial/default values must be set. You can change them here, applying a different setting to each region or simply override the global one.",
+    "newRowTitle": "New region"
   }
 ]
 
@@ -76,6 +241,7 @@ const queryPermission = require('queryPermission');
 const setDefaultConsentState = require('setDefaultConsentState');
 const encodeUri = require('encodeUri');
 const getCookieValues = require('getCookieValues');
+const Object = require('Object');
 
 const getBooleanOrUndefined = (v) => {
   if (typeof v === 'undefined') return undefined;
@@ -113,11 +279,54 @@ const transformToGoogleSettings = (str) => {
   };
 };
 
-const regions = [
+const buildRegions = (userConfigs, builtInConfigs) => {
+  const regionsConfigured = {};
+
+  const regionsDefaults = (userConfigs || []).map((r) => {
+    r.wait_for_update = wait_for_update;
+    if (r.region.length === 0) {
+      regionsConfigured.global = true;
+      Object.delete(r, "region");
+      return r;
+    }
+    r.region = r.region.split(',').map((reg) => reg.toUpperCase());
+    r.region.forEach((reg) => { regionsConfigured[reg] = true; });
+    return r;
+  });
+
+  const builtInRegions = builtInConfigs.map((r) => {
+    if (r.region) {
+      r.region = r.region.filter((reg) => !regionsConfigured[reg]);
+    } else if (regionsConfigured.global) {
+      r.region = [];
+    }
+    r.ad_storage = r.value;
+    r.analytics_storage = r.value;
+    r.functionality_storage = r.value;
+    r.personalization_storage = r.value;
+    r.security_storage = r.value;
+    r.ad_user_data = r.value;
+    r.ad_personalization = r.value;
+    r.wait_for_update = wait_for_update;
+    Object.delete(r, "value");
+    return r;
+  }).filter((r) => r.region === undefined || r.region.length > 0);
+
+  regionsDefaults.forEach((r) => builtInRegions.push(r));
+  const sorted = builtInRegions.sort((a, b) => {
+    if (a.region === undefined || !a.region.every((r) => r.length > 2)) return 1;
+    return -1;
+  });
+  return sorted;
+};
+
+const baseRegions = [
   { region: ['US-VA', 'US-CO', 'US-IN'], value: 'denied' },
   { region: ['US'], value: 'granted' },
   { value: 'denied' },
 ];
+
+const regions = buildRegions(data.regionsDefaults, baseRegions);
 
 /**
  * Google Consent Mode
@@ -130,17 +339,7 @@ if (googleSettings) {
   setDefaultConsentState(googleSettings.state);
 } else {
   regions.forEach((state) => {
-    setDefaultConsentState({
-      ad_storage: state.value,
-      analytics_storage: state.value,
-      functionality_storage: state.value,
-      personalization_storage: state.value,
-      security_storage: state.value,
-      ad_user_data: state.value,
-      ad_personalization: state.value,
-      region: state.region,
-      wait_for_update: wait_for_update,
-    });
+    setDefaultConsentState(state);
   });
 }
 
