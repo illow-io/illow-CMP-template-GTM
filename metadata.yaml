@@ -1,6 +1,8 @@
 homepage: "https://illow.io/"
 documentation: "https://docs.illow.io/"
 versions:
+  - sha: 8f36e6b2ad8a6632d3d87581a6b578ce8dc9e67d
+    changeNotes: Added region-specific consent configuration
   - sha: d8d1f9d982d7c36e5dc6b4a439e0c9c121dc8327
     changeNotes: Added region-specific consent and URL Passthrough checkbox configuration
   - sha: 21eec6216db5e18fb0d2dfeb741a14e2b4c68c3c
