@@ -271,18 +271,18 @@ const transformToGoogleSettings = (str) => {
     });
   return {
     state: {
-      ad_storage: c.marketing || c.optedId ? 'granted' : 'denied',
-      analytics_storage: c.preferences || c.optedId ? 'granted' : 'denied',
-      functionality_storage: c.preferences || c.optedId ? 'granted' : 'denied',
-      personalization_storage: c.preferences || c.optedId ? 'granted' : 'denied',
-      security_storage: c.preferences || c.optedId ? 'granted' : 'denied',
-      ad_user_data: c.marketing || c.optedId ? 'granted' : 'denied',
-      ad_personalization: c.marketing || c.optedId ? 'granted' : 'denied',
+      ad_storage: c.marketing || c.optedIn ? 'granted' : 'denied',
+      analytics_storage: c.preferences || c.optedIn ? 'granted' : 'denied',
+      functionality_storage: c.preferences || c.optedIn ? 'granted' : 'denied',
+      personalization_storage: c.preferences || c.optedIn ? 'granted' : 'denied',
+      security_storage: c.preferences || c.optedIn ? 'granted' : 'denied',
+      ad_user_data: c.marketing || c.optedIn ? 'granted' : 'denied',
+      ad_personalization: c.marketing || c.optedIn ? 'granted' : 'denied',
       wait_for_update: wait_for_update,
     },
     others: {
-      ads_data_redaction: !c.marketing && !c.optedId,
-      url_passthrough: (!c.marketing || !c.preferences) && !c.optedId,
+      ads_data_redaction: !c.marketing && !c.optedIn,
+      url_passthrough: (!c.marketing || !c.preferences) && !c.optedIn,
     },
   };
 };
